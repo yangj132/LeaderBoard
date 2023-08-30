@@ -20,14 +20,36 @@ def register_routes(app):
             
         if not isinstance(data.get('address', ''), str) or not data['address'].strip():
             abort(400, description="Invalid or missing address.")
-    # Get all users
+
     @app.route('/users', methods=['GET'])
     def get_users():
+        """
+        Get All Users
+        ---
+        Retrieves a list of all users in the system.
+        
+        Returns:
+            List of users (JSON), HTTP status code 200
+        """
         users = User.query.all()
         return jsonify([user.serialize for user in users]), 200
-    # Add new users
+
     @app.route('/users', methods=['POST'])
     def add_user():
+        """
+        Add New User
+        ---
+        Adds a new user to the system.
+
+        Parameters:
+            - name: Name of the user (str)
+            - age: Age of the user (int)
+            - points: Points of the user (int)
+            - address: Address of the user (str)
+        
+        Returns:
+            New user data (JSON), HTTP status code 201
+        """
         data = request.get_json()
         print(data)
         validate_user_data(data)
@@ -43,21 +65,58 @@ def register_routes(app):
         except Exception as e:
             db.session.rollback()
             abort(500, description="Server error.")
-    # Get user by Id
+
     @app.route('/users/<int:user_id>', methods=['GET'])
     def get_user(user_id):
+        """
+        Get User by ID
+        ---
+        Retrieves a user by their ID.
+        
+        Parameters:
+            - user_id: ID of the user (int)
+
+        Returns:
+            User data (JSON), HTTP status code 200
+        """
         user = User.query.get_or_404(user_id)
         return jsonify(user.serialize), 200
-    # Delete user by Id
+    
     @app.route('/users/<int:user_id>', methods=['DELETE'])
     def delete_user(user_id):
+        """
+        Delete User by ID
+        ---
+        Deletes a user by their ID.
+        
+        Parameters:
+            - user_id: ID of the user (int)
+
+        Returns:
+            Success message (JSON), HTTP status code 204
+        """
         user = User.query.get_or_404(user_id)
         db.session.delete(user)
         db.session.commit()
         return jsonify({"message": "User deleted successfully"}), 204
-    #Update user by Id
+    
     @app.route('/users/<int:user_id>', methods=['PUT'])
     def update_user(user_id):
+        """
+        Update User by ID
+        ---
+        Updates a user's information by their ID.
+
+        Parameters:
+            - user_id: ID of the user (int)
+            - name: Updated name of the user (Optional, str)
+            - age: Updated age of the user (Optional, int)
+            - points: Updated points of the user (Optional, int)
+            - address: Updated address of the user (Optional, str)
+        
+        Returns:
+            Updated user data (JSON), HTTP status code 200
+        """
         user = User.query.get_or_404(user_id)
         data = request.get_json()
         try:
